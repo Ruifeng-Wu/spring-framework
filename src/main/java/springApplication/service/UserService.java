@@ -2,6 +2,7 @@ package springApplication.service;
 
 import core.Component;
 import core.Scope;
+import core.ScopeEnum;
 
 /**
  * @author: ruifeng.wu
@@ -9,7 +10,7 @@ import core.Scope;
  * @date: 2021/4/13 21:00
  **/
 @Component("userService")
-@Scope("prototype")
+@Scope(ScopeEnum.PROTOTYPE)
 public class UserService {
 
 }

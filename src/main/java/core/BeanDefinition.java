@@ -8,13 +8,13 @@ package core;
 public class BeanDefinition {
 
     private Class clazz;
-    private String scope;
+    private ScopeEnum scope;
 
     public BeanDefinition(Class clazz) {
         this.clazz = clazz;
     }
 
-    public BeanDefinition(Class clazz, String scope) {
+    public BeanDefinition(Class clazz, ScopeEnum scope) {
         this.clazz = clazz;
         this.scope = scope;
     }
@@ -27,11 +27,11 @@ public class BeanDefinition {
         this.clazz = clazz;
     }
 
-    public String getScope() {
+    public ScopeEnum getScope() {
         return scope;
     }
 
-    public void setScope(String scope) {
+    public void setScope(ScopeEnum scope) {
         this.scope = scope;
     }
 }

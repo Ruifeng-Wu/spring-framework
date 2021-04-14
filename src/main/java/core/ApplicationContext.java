@@ -80,7 +80,7 @@ public class ApplicationContext {
                                     Scope scopeAnnotation = clazz.getDeclaredAnnotation(Scope.class);
                                     beanDefinition.setScope(scopeAnnotation.value());
                                 } else {
-                                    beanDefinition.setScope("singleton");
+                                    beanDefinition.setScope(ScopeEnum.SINGLETON);
                                 }
                                 beanDefinitionMap.put(beanName, beanDefinition);
 
