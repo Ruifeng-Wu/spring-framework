@@ -1,5 +1,6 @@
 package springApplication.service;
 
+import core.Autowired;
 import core.Component;
 import core.Scope;
 import core.ScopeEnum;
@@ -12,5 +13,10 @@ import core.ScopeEnum;
 @Component("userService")
 @Scope(ScopeEnum.PROTOTYPE)
 public class UserService {
+    @Autowired
+    private OrderService orderService;
 
+    public void test() {
+        System.out.println(orderService);
+    }
 }

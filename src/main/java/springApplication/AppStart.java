@@ -1,6 +1,7 @@
 package springApplication;
 
 import core.ApplicationContext;
+import springApplication.service.UserService;
 
 /**
  * @author: ruifeng.wu
@@ -10,8 +11,10 @@ import core.ApplicationContext;
 public class AppStart {
     public static void main(String[] args){
         ApplicationContext applicationContext =new ApplicationContext(AppConfig.class);
+        UserService userService = (UserService)applicationContext.getBean("userService");
+        System.out.println(userService);
         System.out.println(applicationContext.getBean("userService"));
         System.out.println(applicationContext.getBean("userService"));
-        System.out.println(applicationContext.getBean("userService"));
+        userService.test();
     }
 }

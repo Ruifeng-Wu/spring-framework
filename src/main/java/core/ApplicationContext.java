@@ -1,7 +1,5 @@
 package core;
 
-import javafx.beans.binding.ObjectExpression;
-
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
@@ -38,7 +36,25 @@ public class ApplicationContext {
     private Object createBean(BeanDefinition beanDefinition) {
         Class clazz = beanDefinition.getClazz();
         try {
-            return clazz.getDeclaredConstructor().newInstance();
+            Object instance = clazz.getDeclaredConstructor().newInstance();
+            //依赖注入
+            Arrays.stream(clazz.getDeclaredFields()).forEach(
+                    field -> {
+                        if (field.isAnnotationPresent(Autowired.class)) {
+                            Object bean = getBean(field.getName());
+                            field.setAccessible(true);
+                            try {
+                                field.set(instance, bean);
+                            } catch (IllegalAccessException e) {
+                                e.printStackTrace();
+                            }
+
+                        }
+                    }
+            );
+
+
+            return instance;
         } catch (InstantiationException e) {
             e.printStackTrace();
         } catch (IllegalAccessException e) {
