@@ -1,11 +1,10 @@
 package core;
 
 import java.io.File;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -18,6 +17,7 @@ public class ApplicationContext {
     private final Class configClass;
     private final ConcurrentHashMap<String, Object> singletonObjects = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, BeanDefinition> beanDefinitionMap = new ConcurrentHashMap<>();
+    private final List<BeanPostProcessor> beanPostProcessors = new ArrayList<>();
 
     public ApplicationContext(Class configClass) {
         this.configClass = configClass;
@@ -27,32 +27,45 @@ public class ApplicationContext {
 
         entries.stream().forEach(beanDefinitionEntry -> {
             if ("singleton".equals(beanDefinitionEntry.getValue().getScope())) {
-                Object bean = createBean(beanDefinitionEntry.getValue());
+                Object bean = createBean(beanDefinitionEntry.getKey(), beanDefinitionEntry.getValue());
                 singletonObjects.put(beanDefinitionEntry.getKey(), bean);
             }
         });
     }
 
-    private Object createBean(BeanDefinition beanDefinition) {
+    private Object createBean(String beanName, BeanDefinition beanDefinition) {
         Class clazz = beanDefinition.getClazz();
         try {
             Object instance = clazz.getDeclaredConstructor().newInstance();
             //依赖注入
-            Arrays.stream(clazz.getDeclaredFields()).forEach(
-                    field -> {
-                        if (field.isAnnotationPresent(Autowired.class)) {
-                            Object bean = getBean(field.getName());
-                            field.setAccessible(true);
-                            try {
-                                field.set(instance, bean);
-                            } catch (IllegalAccessException e) {
-                                e.printStackTrace();
-                            }
-
-                        }
+            for (Field field : clazz.getDeclaredFields()) {
+                if (field.isAnnotationPresent(Autowired.class)) {
+                    Object bean = getBean(field.getName());
+                    field.setAccessible(true);
+                    try {
+                        field.set(instance, bean);
+                    } catch (IllegalAccessException e) {
+                        e.printStackTrace();
                     }
-            );
-
+                }
+            }
+            //aware回调
+            if (instance instanceof BeanNameAware) {
+                ((BeanNameAware) instance).setBeanName(beanName);
+            }
+            for (BeanPostProcessor beanPostProcessor :
+                    beanPostProcessors) {
+                instance = beanPostProcessor.postProcessAfterInitialization(instance, beanName);
+            }
+            //初始化
+            if (instance instanceof BeanNameAware) {
+                ((InitializingBean) instance).afterPropertiesSet();
+            }
+            //BeanPostProcessor
+            for (BeanPostProcessor beanPostProcessor :
+                    beanPostProcessors) {
+                instance = beanPostProcessor.postProcessBeforeInitialization(instance, beanName);
+            }
 
             return instance;
         } catch (InstantiationException e) {
@@ -62,6 +75,8 @@ public class ApplicationContext {
         } catch (NoSuchMethodException e) {
             e.printStackTrace();
         } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
@@ -88,7 +103,10 @@ public class ApplicationContext {
                             ).replace("/", "."));
                             if (clazz.isAnnotationPresent(Component.class)) {
                                 //解析类prototype singleton
-
+                                if (BeanPostProcessor.class.isAssignableFrom(clazz)) {
+                                    BeanPostProcessor instance = (BeanPostProcessor) clazz.getDeclaredConstructor().newInstance();
+                                    beanPostProcessors.add(instance);
+                                }
                                 Component componentAnnotation = clazz.getDeclaredAnnotation(Component.class);
                                 String beanName = componentAnnotation.value();
                                 BeanDefinition beanDefinition = new BeanDefinition(clazz);
@@ -102,7 +120,13 @@ public class ApplicationContext {
 
                             }
 
-                        } catch (ClassNotFoundException e) {
+                        } catch (ClassNotFoundException | NoSuchMethodException e) {
+                            e.printStackTrace();
+                        } catch (IllegalAccessException e) {
+                            e.printStackTrace();
+                        } catch (InstantiationException e) {
+                            e.printStackTrace();
+                        } catch (InvocationTargetException e) {
                             e.printStackTrace();
                         }
 
@@ -121,6 +145,6 @@ public class ApplicationContext {
             Object bean = singletonObjects.get(beanName);
             return bean;
         }
-        return createBean(beanDefinition);
+        return createBean(beanName, beanDefinition);
     }
 }

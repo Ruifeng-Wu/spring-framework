@@ -1,9 +1,6 @@
 package springApplication.service;
 
-import core.Autowired;
-import core.Component;
-import core.Scope;
-import core.ScopeEnum;
+import core.*;
 
 /**
  * @author: ruifeng.wu
@@ -12,11 +9,26 @@ import core.ScopeEnum;
  **/
 @Component("userService")
 @Scope(ScopeEnum.PROTOTYPE)
-public class UserService {
+public class UserService implements InitializingBean,BeanNameAware {
     @Autowired
     private OrderService orderService;
 
+    private String beanName;
+
+    private String name;
+
     public void test() {
         System.out.println(orderService);
+        System.out.println(beanName);
+    }
+
+    @Override
+    public void setBeanName(String beanName) {
+        this.beanName = beanName;
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        System.out.println("xxxxxxxx");
     }
 }
