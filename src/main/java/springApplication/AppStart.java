@@ -13,8 +13,6 @@ public class AppStart {
         ApplicationContext applicationContext =new ApplicationContext(AppConfig.class);
         UserService userService = (UserService)applicationContext.getBean("userService");
         System.out.println(userService);
-        System.out.println(applicationContext.getBean("userService"));
-        System.out.println(applicationContext.getBean("userService"));
         userService.test();
     }
 }

@@ -1,6 +1,6 @@
 package springApplication.service;
 
-import core.Component;
+import core.annotation.Component;
 
 /**
  * @author: ruifeng.wu

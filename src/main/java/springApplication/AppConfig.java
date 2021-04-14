@@ -1,6 +1,6 @@
 package springApplication;
 
-import core.ComponentScan;
+import core.annotation.ComponentScan;
 
 /**
  * @author: ruifeng.wu

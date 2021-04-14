@@ -1,5 +1,10 @@
 package core;
 
+import core.annotation.Autowired;
+import core.annotation.Component;
+import core.annotation.ComponentScan;
+import core.annotation.Scope;
+
 import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
